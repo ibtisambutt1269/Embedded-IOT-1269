@@ -1,0 +1,195 @@
+
+#include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+// --- Pin Configuration ---
+#define LED1 15
+#define LED2 17
+#define BTN_MODE 33
+#define BTN_RESET 34
+// SDA → 21, SCL → 22
+
+int mode = 0;
+unsigned long previousMillis = 0;    // for blinking
+unsigned long modeStartTime = 0;     // to track 5 sec duration
+bool ledState = false;
+const unsigned long MODE_DURATION = 5000; // 5 seconds per mode
+
+// --- Helper Function to show text on OLED ---
+void showMode(String text) {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 25);
+  display.print("Mode: ");
+  display.println(text);
+  display.display();
+}
+
+// --- Setup ---
+void setup() {
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(BTN_MODE, INPUT);
+  pinMode(BTN_RESET, INPUT);
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    for (;;); // halt if OLED not found
+  }
+
+  display.clearDisplay();
+  showMode("OFF");
+
+  modeStartTime = millis(); // start first mode timer
+}
+
+// --- Main Loop ---
+void loop() {
+  // --- Button Handling ---
+  if (digitalRead(BTN_MODE) == HIGH) {
+    mode = (mode + 1) % 4;  // manually cycle 0–3
+    modeStartTime = millis();
+    delay(300);             // debounce
+  }
+
+  if (digitalRead(BTN_RESET) == HIGH) {
+    mode = 0;               // reset to OFF
+    modeStartTime = millis();
+    delay(300);
+  }
+
+  // --- Auto-switch after 5 seconds ---
+  if (millis() - modeStartTime >= MODE_DURATION) {
+    mode = (mode + 1) % 4;  // next mode automatically
+    modeStartTime = millis();
+  }
+
+  // --- LED Modes ---
+  switch (mode) {
+    case 0: // Both OFF
+      digitalWrite(LED1, LOW);
+      digitalWrite(LED2, LOW);
+      showMode("OFF");
+      break;
+
+    case 1: // Alternate Blink
+      showMode("ALT BLINK");
+      if (millis() - previousMillis > 500) { // toggle every 0.5s
+        previousMillis = millis();
+        ledState = !ledState;
+        digitalWrite(LED1, ledState ? HIGH : LOW);
+        digitalWrite(LED2, ledState ? LOW : HIGH);
+      }
+      break;
+
+    case 2: // Both ON
+      digitalWrite(LED1, HIGH);
+      digitalWrite(LED2, HIGH);
+      showMode("BOTH ON");
+      break;
+
+    case 3: // PWM Fade (non-blocking fade)
+      showMode("FADE");
+      static int brightness = 0;
+      static int fadeAmount = 5;
+      analogWrite(LED1, brightness);
+      analogWrite(LED2, brightness);
+      brightness += fadeAmount;
+      if (brightness <= 0 || brightness >= 255) fadeAmount = -fadeAmount;
+      delay(20);
+      break;
+  }
+}
+
+
+
+
+
+
+#include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+// --- OLED Configuration ---
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+// --- Pin Configuration ---
+#define BUTTON_PIN 33   // Push button pin
+#define LED_PIN 18        // LED pin
+#define BUZZER_PIN 16     // Buzzer pin
+
+// --- Variables ---
+unsigned long pressStartTime = 0;
+bool buttonPressed = false;
+bool ledState = false;
+const unsigned long LONG_PRESS_TIME = 1500;  // 1.5 seconds threshold
+
+void setup() {
+  pinMode(BUTTON_PIN, INPUT_PULLUP);  // Active LOW button
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  // Initialize OLED
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("OLED not found"));
+    for (;;);
+  }
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 20);
+  display.println("Task B: Button Test");
+  display.display();
+  delay(1500);
+  display.clearDisplay();
+}
+
+void loop() {
+  int buttonState = digitalRead(BUTTON_PIN);
+
+  // Detect button press start
+  if (buttonState == LOW && !buttonPressed) {
+    buttonPressed = true;
+    pressStartTime = millis();
+  }
+
+  // Detect button release
+  if (buttonState == HIGH && buttonPressed) {
+    unsigned long pressDuration = millis() - pressStartTime;
+    buttonPressed = false;
+
+    if (pressDuration < LONG_PRESS_TIME) {
+      // ---- Short Press Action ----
+      ledState = !ledState;
+      digitalWrite(LED_PIN, ledState);
+
+      // Display event
+      display.clearDisplay();
+      display.setCursor(10, 20);
+      display.println("Short Press:");
+      display.setCursor(10, 35);
+      display.print("LED ");
+      display.print(ledState ? "ON" : "OFF");
+      display.display();
+    } else {
+      // ---- Long Press Action ----
+      tone(BUZZER_PIN, 1000, 500); // 1000Hz tone for 0.5s
+
+      display.clearDisplay();
+      display.setCursor(10, 25);
+      display.println("Long Press:");
+      display.setCursor(10, 40);
+      display.println("Buzzer Sound!");
+      display.display();
+    }
+  }
+}
