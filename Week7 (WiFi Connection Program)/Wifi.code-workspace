@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../Wifi"
+		},
+		{
+			"name": "ESP32 LED Control",
+			"path": "."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "ESP32 LED Control"
+	}
+}

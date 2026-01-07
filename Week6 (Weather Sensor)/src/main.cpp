@@ -2,101 +2,41 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <DHT.h>
 
-// --- Pin configuration ---
-#define DHTPIN 14        // DHT sensor data pin
-#define DHTTYPE DHT11    // Change to DHT22 if using that
+// OLED pins
+#define SDA_PIN 21
+#define SCL_PIN 22
 
-#define SDA_PIN 21       // I2C SDA
-#define SCL_PIN 22       // I2C SCL
-
-// --- OLED setup ---
+// OLED display settings
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-// --- DHT setup ---
-DHT dht(DHTPIN, DHTTYPE);
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("ESP32 Temperature Display Starting...");
+  Serial.println("OLED Test Starting...");
 
-  // Initialize I2C
+  // Start I2C
   Wire.begin(SDA_PIN, SCL_PIN);
 
-  // Initialize OLED display
+  // Initialize OLED (address 0x3C)
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println("SSD1306 initialization failed!");
-    for (;;);
+    Serial.println("OLED INIT FAILED!");
+    while (true);  // Stop here if failed
   }
 
-  // Display startup message
-  display.clearDisplay();
-  display.setTextColor(SSD1306_WHITE);
-  display.setTextSize(1);
-  display.setCursor(0, 0);
-  display.println("Initializing...");
-  display.display();
+  Serial.println("OLED Initialized Successfully!");
 
-  // Start DHT sensor
-  dht.begin();
-  delay(2000);
+  // Show simple test message
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 20);
+  display.println("WORKING!");
+  display.display();
 }
 
 void loop() {
-  float temperature = dht.readTemperature();
-  float humidity = dht.readHumidity();
-
-  if (isnan(temperature) || isnan(humidity)) {
-    Serial.println("Failed to read from DHT sensor!");
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setCursor(0, 0);
-    display.println("Sensor Error!");
-    display.display();
-    delay(2000);
-    return;
-  }
-
-  // Determine temperature status
-  String tempStatus;
-  if (temperature >= 30) {
-    tempStatus = "Status: HOT";
-  } else if (temperature <= 20) {
-    tempStatus = "Status: COLD";
-  } else {
-    tempStatus = "Status: NORMAL";
-  }
-
-  // Print to Serial Monitor
-  Serial.print("Temp: ");
-  Serial.print(temperature);
-  Serial.print(" °C | Humidity: ");
-  Serial.print(humidity);
-  Serial.print(" % | ");
-  Serial.println(tempStatus);
-
-  // Display on OLED
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setCursor(0, 0);
-  display.println("ESP32 Temp Monitor");
-
-  display.setCursor(0, 16);
-  display.print("Temp: ");
-  display.print(temperature);
-  display.println(" C");
-
-  display.setCursor(0, 32);
-  display.print("Humidity: ");
-  display.print(humidity);
-  display.println(" %");
-
-  display.setCursor(0, 48);
-  display.println(tempStatus);
-  display.display();
-
-  delay(2000);
+  // Keep showing the same message
 }
