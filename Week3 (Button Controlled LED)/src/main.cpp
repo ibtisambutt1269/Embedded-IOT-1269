@@ -1,7 +1,3 @@
-// 23-NTU-CS-1011
-// ALI HASSAN
-
-// Turning light on with One Button
 #include <Arduino.h>
 
 const int buttonPin = 34;

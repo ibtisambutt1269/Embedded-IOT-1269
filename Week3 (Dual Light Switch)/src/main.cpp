@@ -1,7 +1,3 @@
-// Ali Hassan 
-//23-NTU-CS-1011
-
-// Program to Turn both lights on when the button clicks
 #include <Arduino.h>
 
 const int buttonPin = 35;

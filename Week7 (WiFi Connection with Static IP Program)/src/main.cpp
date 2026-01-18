@@ -1,7 +1,7 @@
 #include <WiFi.h>
 
-const char* ssid = "massad";
-const char* password = "mshmr054";
+const char* ssid = "ibtisam";
+const char* password = "12344321";
 
 // Static IP configuration
 IPAddress local_IP(192, 168, 43, 50);     // ESP32 fixed IP

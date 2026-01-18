@@ -1,6 +1,3 @@
-// ALi Hassan
-// 1011
-// Blinking LED using timer
 
 #include <Arduino.h>
 

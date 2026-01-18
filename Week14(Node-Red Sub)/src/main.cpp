@@ -1,6 +1,6 @@
 /****************************************************
  * ESP32 + MQTT Subscriber + OLED (Temp only)
- * Subscribes: home/lab2/temp
+ * Subscribes: home/lab1/temp
  * Displays temperature on SSD1306 OLED
  ****************************************************/
 

@@ -19,7 +19,7 @@ const char* mqtt_server = "192.168.13.1";  // Mosquitto / Cloud broker
 const int   mqtt_port   = 1883;
 
 // Topics
-const char* TOPIC_HUM  = "pub1/lab2/hum";
+const char* TOPIC_HUM  = "home1/lab1/hum";
 
 // ---------- DHT ----------
 #define DHTPIN  23
